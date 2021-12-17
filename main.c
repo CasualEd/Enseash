@@ -4,51 +4,42 @@
 #include <unistd.h>
 #include <stdio.h>
 #include "string.h"
-#define BUFSIZE 120
+#include <stdlib.h> 					//for exit()
+#define bufSizeMax 1024
 int main(int argc, char * argv){
-	int screen=1;
-	int rea;
-	char cha;
-	int flag=0;                      
-	char * buf="Welcome to ENSEA Tiny Shell. \nPour quitter, tapez 'exit'. \nenseash \% ";
-	char * exit="exit";
-	char command[BUFSIZE];
-	char * cop;
-	char * test;
-	int ret=strlen(buf); // Since each character is represent by 8 bits we multiply by 8 the size of buffer
-	write(STDOUT_FILENO,buf ,ret); // We print the string directly on the screen
-	ret=1; 
-	//while(flag==0){
-		//cha=fgetc(stdin); // We wait till the user presses a key 
-		//if(cha==0x0A){
-			//flag=1;
-		//}
-		//else{
-			//write(screen ,cha,ret);
-			//command+=1;
-			//*(command)=cha;
-		//}
-		
-	//}
-	cop=malloc(20);
-	rea=read(STDIN_FILENO,command,BUFSIZE);
-	sprintf(cop,"%d",rea);
+	int pid, status;
+	char command[bufSizeMax];
+	int cmp;
 	
-	write(screen,cop,rea);
-	*(command+rea)='\0';
+	char * welcomeMessage="Welcome to ENSEA Tiny Shell. \nPour quitter, tapez 'exit'. ";
+	const char * shellMessage="\nenseash \% "; 	
+	int lgthWelcString=strlen(welcomeMessage); // Since each character is represent by 8 bits we multiply by 8 the size of buffer
+	int lgthShellString=strlen(shellMessage);
+	write(STDOUT_FILENO, welcomeMessage, lgthWelcString); // We print the welcome message string directly on the screen
+	write(STDOUT_FILENO, shellMessage, lgthShellString);
+	
+}
 
+//ShellMess
+	//const char * shellMessage="\nenseash \%"; 	
+	//char command[bufSizeMax];
+
+//Test d'affichage de char 
+	//char *b = malloc(sizeof(char));
+	//*b= *(command+readLength-2);
+	//writeLength=write(STDOUT_FILENO,b,4);
+	//printf(b);
+
+
+// Affichage du résultat de strncmp
+	//int cmp;
+	//cmp = strncmp(command,"exit",bufSizeMax);
+	//printf("%d",cmp);
 	
+ //We indicate the EOS
 	
-	
-	
-	
-	if(strncmp(command,"exit",strlen(command))==0){
-		write(screen,"Yori",8);
-	}
+	//int cmp = strncmp(command,"exit",bufSizeMax);
+	//printf("%d",cmp);
 	
 
-			
-	
-	
-}// EXIT_SUCCESS
 
