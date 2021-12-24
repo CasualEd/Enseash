@@ -10,6 +10,7 @@
 #define bufSizeMax 1024
 #define nsToS 1000000000
 #define SToms 0.000001
+#define bufInt 8
 
 //Functions
 
@@ -18,7 +19,28 @@ void printString(char * string){
 	write(STDOUT_FILENO, string, lgthString);
 }
 
-void getCommand(char * command, int flag, int old_status, int sigOrExit, long timeDiff){
+void getCommandEnd(char * command, char * comExec, char ** argument_list){
+	//reading the whole command
+	int readLength;
+	readLength=read(STDIN_FILENO,command,bufSizeMax);
+	*(command+readLength-1) ='\0';
+	
+	//parsing the command in parts
+	char *token;
+	token = strtok(command, " ");
+	sprintf(comExec,"%s", token); //retrieving the command's name
+	
+	int argpos=0;
+	while(token != NULL){ //retrieving and storing parameters in an array
+		sprintf(argument_list[argpos],"%s", token);
+		argpos++;
+		token = strtok(NULL, " ");
+	}
+	argument_list[argpos]=NULL;	//last argument has to be a NULL pointer
+	free(token);
+}
+
+void getCommand(char * command, char * comExec, char ** argument_list, int flag, int old_status, int sigOrExit, long timeDiff){
 	if(flag==0){			//first command typed in
 		printString("enseash % ");
 	}else{ //at least one command has been entered
@@ -33,9 +55,7 @@ void getCommand(char * command, int flag, int old_status, int sigOrExit, long ti
 		printString(strInfo);
 		free(strInfo);
 	}
-	int readLength;
-	readLength=read(STDIN_FILENO,command,bufSizeMax);
-	*(command+readLength-1) ='\0';
+	getCommandEnd(command, comExec, argument_list);
 }
 
 
@@ -59,8 +79,17 @@ int main(int argc, char ** argv){
 	printString("Welcome to ENSEA Tiny Shell. \nPour quitter, tapez 'exit'. \n");
 	
 	while(1){ //never-ending loop that creates a child after each command executed to execute it, and ask for a new command after its termination
+		//initialisation of an array of string to store the command's parameters
+		//done at each turn of loop to avoid segmentation faults
+		//freed below
+		char ** argument_list = malloc(sizeof(char*)*bufInt);
+		for(int im=0;im<bufInt;im++){
+			argument_list[im]= (char*)malloc(bufSizeMax*sizeof(char));
+		}
+		char * comExec = malloc(sizeof(char)*bufSizeMax); //string to save the name of the command called
+		
 		timeDiff=timeDifferencems(timeStart,timeStop);		//getting the execution time in ms
-		getCommand(command, flag, old_status, sigOrExit, timeDiff);
+		getCommand(command, comExec, argument_list, flag, old_status, sigOrExit, timeDiff);
 		if(strncmp(command,"exit",bufSizeMax)==0){ //the program exits if exit is typed
 			printString("Bye bye...\n");
 			exit(EXIT_SUCCESS);
@@ -79,10 +108,12 @@ int main(int argc, char ** argv){
 			}
 			flag=1; //to mark that one command has been executed
 		}else{			//child's code
-			execlp(command,command, (char  *) NULL);
+			execvp(comExec, argument_list);
 			printString("Erreur d'exécution, veuillez revoir votre commande.\n");
 			exit(EXIT_FAILURE);
 		}
+		free(argument_list);
+		free(comExec);
 	}	
 }
 
