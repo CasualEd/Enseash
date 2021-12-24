@@ -29,8 +29,12 @@ int main(int argc, char ** argv){
 	
 	printString("Welcome to ENSEA Tiny Shell. \nPour quitter, tapez 'exit'. \n");
 	
-	while(1){ //never-ending loop that creates a child after each command excuted to execute it, and ask for a new command after its termination
+	while(1){ //never-ending loop that creates a child after each command executed to execute it, and ask for a new command after its termination
 		getCommand(command);
+		if(strncmp(command,"exit",bufSizeMax)==0){ //the program exits if exit is typed
+			printString("Bye bye...\n");
+			exit(EXIT_SUCCESS);
+		}
 		pid = fork();
 		if(pid!=0){ 	//father's code
 			wait(&status); //the father waits for the child's termination
@@ -41,4 +45,3 @@ int main(int argc, char ** argv){
 		}
 	}	
 }
-
